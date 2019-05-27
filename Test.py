@@ -40,9 +40,9 @@ def rop_32(binary_path):
       for file, ppr in pprs.items():
            for p in ppr:
                 print(p)
-		            rop_gadgets.append(p)
+		rop_gadgets.append(p)
 				
-     return rop_gadgets
+      return rop_gadgets
 	  
 	  
 				
@@ -98,7 +98,7 @@ def pop_pop_ret_32(program_file):
     result = output.split()
 	  
 def main():  
-	  writable_section_bss = bss_overwrite_find("garbage") #locate writable section of .bss
+    writable_section_bss = bss_overwrite_find("garbage") #locate writable section of .bss
     print("writable .bss Segment: "+writable_section_bss)			
     s,h = rop_gadget_locater("garbage") # locate bin/sh  strings in memory
     print("s->register:"+s,"h->register:"+h)
