@@ -26,24 +26,25 @@ def rop_32(binary_path):
      rs.options.all = True
 
 
-      ##### open binaries ######
+     ##### open binaries ######
 
-      # it is possible to open multiple files
-      rs.addFile('garbage_raw', bytes=open(binary_path,'rb').read(), raw=True, arch='x86_64')
+     # it is possible to open multiple files
+     rs.addFile(sys.argv[1], bytes=open(binary_path,'rb').read(), raw=True, arch='x86_64')
 
 
 
-      rs.loadGadgetsFor()
-      #rs.printGadgetsFor() # print all gadgets
+     rs.loadGadgetsFor()
+     #rs.printGadgetsFor() # print all gadgets
 
-      pprs = rs.searchPopPopRet()        # looks for ppr in all opened files
-      for file, ppr in pprs.items():
-           for p in ppr:
-                print(p)
-		rop_gadgets.append(p)
-				
-      return rop_gadgets
-	  
+     pprs = rs.searchPopPopRet()        # looks for ppr in all opened files
+     for file, ppr in pprs.items():
+         for p in ppr:
+             print(p)
+             rop_gadgets.append(p)
+
+
+     return rop_gadgets
+      
 	  
 				
 
@@ -52,7 +53,7 @@ def rop_32(binary_path):
 def rop_gadget_locater_sh_32(program_file):
     remove_identifier = """Memory bytes information
 ======================================================="""
-    cmd = ["ROPgadget", "--binary",program_file,"--memstr","\"sh\""]
+    cmd = ["ROPgadget", "--binary",sys.argv[1],"--memstr","\"sh\""]
     print("\nRunning command: "+' '.join(cmd))
     sp = subprocess.Popen(cmd, shell=False, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     output = ""
@@ -87,18 +88,20 @@ def rop_gadget_locater_sh_32(program_file):
 
 def bss_overwrite_find_32(program_file):
     #we will use strcpy to write string in .bss address but what address ?
-    output = subprocess.check_output("readelf -t "+program_file+ "|grep  .bss -A 2", shell=True)
+    output = subprocess.check_output("readelf -t "+sys.argv[1]+ "|grep  .bss -A 2", shell=True)
     result = output.split()
     return result[4]
     
  
 def pop_pop_ret_32(program_file):
     #this is for strcpy
-    output = subprocess.check_output("ROPgadget --binary "+garbage+" --ropchain | grep pop | grep pop"
+    output = subprocess.check_output("ROPgadget --binary "+sys.argv[1]+" --ropchain | grep pop | grep pop")
     result = output.split()
 	  
 def main():  
-    writable_section_bss = bss_overwrite_find("garbage") #locate writable section of .bss
-    print("writable .bss Segment: "+writable_section_bss)			
-    s,h = rop_gadget_locater("garbage") # locate bin/sh  strings in memory
-    print("s->register:"+s,"h->register:"+h)
+    writable_section_bss = bss_overwrite_find_32(sys.argv[1]) #locate writable section of .bss
+    print("writable .bss Segment: "+str(writable_section_bss))			
+    s,h = rop_gadget_locater_sh_32(sys.argv[1]) # locate bin/sh  strings in memory
+    print("s->register:"+str(s),"h->register:"+str(h))
+
+main()
